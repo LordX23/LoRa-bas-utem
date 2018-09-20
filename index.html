@@ -244,9 +244,7 @@
        switch (fun) {
         case "add":
           console.log("AddNewMarkerToID:" + ind);
-          //markers[ind].mark.setPosition( new google.maps.LatLng( lat, lng ) );
-          //map.setCenter(new google.maps.LatLng( lat, lng ));
-          
+       
           if (rssi < -90) {
             icon =  'http://maps.google.com/mapfiles/ms/icons/purple-dot.png';
           }
@@ -286,9 +284,6 @@
        switch (fun) {
         case "add":
           console.log("AddNewMarkerToID:" + ind);
-          //markers[ind].mark.setPosition( new google.maps.LatLng( lat, lng ) );
-          //map.setCenter(new google.maps.LatLng( lat, lng ));
-
             var marker = new google.maps.Marker({
             position: new google.maps.LatLng(lat, lng),
             map: map,
@@ -297,10 +292,6 @@
 
           map.setCenter(new google.maps.LatLng(lat, lng));
 
-          /*var value = {
-            id:ind,
-            mark: marker
-          }*/
           markers.push(marker);
           break;
 
@@ -313,62 +304,6 @@
       }
     }
  
- /*socket = io('http://i-refit.azurewebsites.net');
-  //socket = io('http://localhost:3000');
-  socket.on('connect', function(){
-    alert('connected to server.');
-  });
-
-  socket.on('history', function(data){
-    console.log(data);
-
-    $.each(data, function(index, coord) {
-      console.log(coord);
-
-      var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(coord.LAT, coord.LNG),
-        map: map
-      });
-      markers.push(marker);
-
-      map.setCenter(new google.maps.LatLng( coord.LAT, coord.LNG ));
-
-    });
-
-  });
-
-  socket.on('marker', function(data) {
-    var json = JSON.parse(data);
-
-    console.log(data);
-    //console.log(json.id);
-
-    for(var n = 0; n < markers.length; n++) {
-      if(markers[n].id == json.id) {
-        console.log(markers[n]);
-        updateMarkerPosition(n, json.lat, json.lng, json.fn);
-        return;
-      } 
-    }
-
-    console.log("new marker id");
-    var marker = new google.maps.Marker({
-      position: new google.maps.LatLng(json.lat, json.lng),
-      map: map
-    });
-
-    map.setCenter(new google.maps.LatLng( json.lat, json.lng ));
-
-    var value = {
-      id:json.id,
-      mark: marker
-    }
-    markers.push(value);
-
-    console.log(markers);
-  });*/
-
-
   </script>
 
   <style type="text/css">
