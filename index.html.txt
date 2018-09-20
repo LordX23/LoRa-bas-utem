@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title></title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"$
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <!-- <script src="http://maps.googleapis.com/maps/api/js"></script> -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEBuP2T5uk96eoajwLet077i9krYIeFno&callback=initMa$
+    defer></script>
+
+  <script type="text/javascript">
+    //var mqtt = require('mqtt')
+    var clientId = 'mqttjs_' + Math.random().toString(16).substr(2, 8)
+    var client2Id = 'mqttjs_' + Math.random().toString(16).substr(2, 8)
+    var host = 'ws://35.240.203.234:1884'
+    var maps;
+    var markers = [];
+
+    var options = {
+      keepalive: 10,
+      clientId: clientId,
+      protocolId: 'MQTT',
+      protocolVersion: 4,
+      clean: true,
+      reconnectPeriod: 1000,
+      connectTimeout: 30 * 1000,
+      will: {
+        topic: 'WillMsg',
+        payload: 'Connection Closed abnormally..!',
+        qos: 0,
+        retain: false
+      },
+      username: 'loraroot',
+      password: 'lorarootpassword',
+      rejectUnauthorized: false
+    }
+
+    var options2 = {
+      keepalive: 10,
+      clientId: client2Id,
+      protocolId: 'MQTT',
+      protocolVersion: 4,
+      clean: true,
+      reconnectPeriod: 1000,
+      connectTimeout: 30 * 1000,
+      will: {
+        topic: 'WillMsg',
+        payload: 'Connection Closed abnormally..!',
+        qos: 0,
+        retain: false
+      },
+      username: 'loraroot',
+      password: 'lorarootpassword',
+      rejectUnauthorized: false
+    }
+      $(document).ready(function () {
+      console.log('ready')
+
+      var client = mqtt.connect(host,options)
+
+      client.on('connect', () => {
+        console.log('mqtt client  connected')
+        client.subscribe('lora-utem/coordinate')
+      })
+
+      client.on('message', (topic, message) => {
+        console.log('topic: %s ', topic)
+        switch (topic) {
+            case 'lora-utem/coordinate':
+              return handleCoordinate(message)
+        }
+        console.log('No handler for topic %s', topic)
+      })
+        
+        client.on('close', function () {
+        console.log('disconnected')
+      })
+      client.on('error', function (err) {
+       console.log(err)
+       client.end()
+      })
+   });
+
+
+    $(document).ready(function () {
+      console.log('ready2')
+
+      var client2 = mqtt.connect(host,options2)
+
+      client2.on('connect', () => {
+        console.log('mqtt client2 connected')
+        client2.subscribe('downlink')
+      })
+
+      client2.on('message', (topic, message) => {
+        console.log('topic: %s ', topic)
+        switch (topic) {
+            case 'downlink':
+              return handleCoordinate2(message)
+        }
+        console.log('No handler for topic %s', topic)
+      })
+
+      client2.on('close', function () {
+        console.log('disconnected')
+      })
+      client2.on('error', function (err) {
+       console.log(err)
+       client2.end()
+      })
+   });
+
+    function handleCoordinate2(message) {
+      try {
+        var json2 = JSON.parse(message)
+        json2.latitude = json2.latitude.trim();
+        json2.longitude = json2.longitude.substring(0, json2.longitude.length - 1);
+
+        console.log(json2);
+
+        let i = this.markers.findIndex(x => x._id == json2._id);
+        if (i >= 0) {
+          console.log("existing marker id: update position");
+
+          updateMarkerPosition2(i, json2.latitude, json2.longitude, json2.display);
+        } else {
+          console.log("new marker id");
+
+          var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(json2.latitude, json2.longitude),
+            map: map,
+            icon: 'http://maps.google.com/mapfiles/kml/paddle/D-lv.png'
+          });
+
+          map.setCenter(new google.maps.LatLng(json2.latitude, json2.longitude));
+
+          var value = {
+            _id: json2._id,
+            mark: marker
+          }
+          markers.push(value);
+        }
+      } catch (e) {
+        console.warn(e)
+      }
+    }
+
+    function handleCoordinate(message) {
+      try {
+        var json = JSON.parse(message)
+//        console.log(json)
+        json.latitude = json.latitude.trim();
+        json.longitude = json.longitude.substring(0, json.longitude.length - 1);
+
+        console.log(json);
+
+        let i = this.markers.findIndex(x => x._id == json._id);
+        rssi = Number(json.rssi);
+        if (i >= 0) {
+          console.log("existing marker id: update position");
+
+          updateMarkerPosition(i, json.latitude, json.longitude, json.display, rssi);
+        } else {
+          console.log("new marker id");
+
+          var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(json.latitude, json.longitude),
+            map: map,
+            icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+          });
+
+          map.setCenter(new google.maps.LatLng(json.latitude, json.longitude));
+
+          var value = {
+            _id: json._id,
+            mark: marker
+          }
+          markers.push(value);
+        }
+      } catch (e) {
+        console.warn(e)
+      }
+    }
+
+    function initMap() {
+      var mapProp = {
+        center: new google.maps.LatLng(2.3141214, 102.3159033),
+        zoom: 15,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      };
+
+      map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+
+    }
+
+
+    function show_option() {
+      var modal = document.getElementById('myModal');
+      modal.style.display = "block";
+    }
+
+    function hide_option() {
+      var modal = document.getElementById('myModal');
+      modal.style.display = "none";
+    }
+
+    function get_history() {
+      if ($("#user").val()) {
+
+        clear_marker();
+
+        var value = {
+          user: $("#user").val(),
+         date: $("#date").val() ? $("#date").val() : 0,
+          time: $("#time").val() ? $("#time").val() : 0
+        }
+
+        console.log(value);
+
+        if (socket)
+          socket.emit('history', value);
+        else
+          alert('Disconencted from Server');
+
+        hide_option();
+
+      } else {
+        alert('Missing User ID');
+      }
+    }
+
+    function clear_marker() {
+      for (var i = 0; i < markers.length; i++) {
+       markers[i].setMap(null);
+      }
+      markers = [];
+    }
+
+    function updateMarkerPosition(ind, lat, lng, fun, rssi) {
+      var icon;
+       switch (fun) {
+        case "add":
+          console.log("AddNewMarkerToID:" + ind);
+          //markers[ind].mark.setPosition( new google.maps.LatLng( lat, lng ) );
+          //map.setCenter(new google.maps.LatLng( lat, lng ));
+          
+          if (rssi < -90) {
+            icon =  'http://maps.google.com/mapfiles/ms/icons/purple-dot.png';
+          }
+          else if (rssi <= -50 && rssi >= -90)  {
+            icon = 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+          }
+          else {
+           icon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+          }
+
+          var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat, lng),
+            map: map,
+            icon: icon,
+          });
+
+          map.setCenter(new google.maps.LatLng(lat, lng));
+
+          /*var value = {
+            id:ind,
+            mark: marker
+          }*/
+          markers.push(marker);
+          break;
+
+        case "mov":
+          console.log("updateMarkerPosition: " + lat + " " + lng);
+
+          markers[ind].mark.setPosition(new google.maps.LatLng(lat, lng));
+          map.setCenter(new google.maps.LatLng(lat, lng));
+          break;
+      }
+    }
+
+    function updateMarkerPosition2(ind, lat, lng, fun) {
+      var icon = 'http://maps.google.com/mapfiles/kml/paddle/D-lv.png';
+       switch (fun) {
+        case "add":
+          console.log("AddNewMarkerToID:" + ind);
+          //markers[ind].mark.setPosition( new google.maps.LatLng( lat, lng ) );
+          //map.setCenter(new google.maps.LatLng( lat, lng ));
+
+            var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat, lng),
+            map: map,
+            icon: icon,
+          });
+
+          map.setCenter(new google.maps.LatLng(lat, lng));
+
+          /*var value = {
+            id:ind,
+            mark: marker
+          }*/
+          markers.push(marker);
+          break;
+
+        case "mov":
+          console.log("updateMarkerPosition: " + lat + " " + lng);
+
+          markers[ind].mark.setPosition(new google.maps.LatLng(lat, lng));
+          map.setCenter(new google.maps.LatLng(lat, lng));
+          break;
+      }
+    }
+ 
+ /*socket = io('http://i-refit.azurewebsites.net');
+  //socket = io('http://localhost:3000');
+  socket.on('connect', function(){
+    alert('connected to server.');
+  });
+
+  socket.on('history', function(data){
+    console.log(data);
+
+    $.each(data, function(index, coord) {
+      console.log(coord);
+
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(coord.LAT, coord.LNG),
+        map: map
+      });
+      markers.push(marker);
+
+      map.setCenter(new google.maps.LatLng( coord.LAT, coord.LNG ));
+
+    });
+
+  });
+
+  socket.on('marker', function(data) {
+    var json = JSON.parse(data);
+
+    console.log(data);
+    //console.log(json.id);
+
+    for(var n = 0; n < markers.length; n++) {
+      if(markers[n].id == json.id) {
+        console.log(markers[n]);
+        updateMarkerPosition(n, json.lat, json.lng, json.fn);
+        return;
+      } 
+    }
+
+    console.log("new marker id");
+    var marker = new google.maps.Marker({
+      position: new google.maps.LatLng(json.lat, json.lng),
+      map: map
+    });
+
+    map.setCenter(new google.maps.LatLng( json.lat, json.lng ));
+
+    var value = {
+      id:json.id,
+      mark: marker
+    }
+    markers.push(value);
+
+    console.log(markers);
+  });*/
+
+
+  </script>
+
+  <style type="text/css">
+    /* The Modal (background) */
+
+    .modal {
+      display: none;
+      /* Hidden by default */
+      position: fixed;
+      /* Stay in place */
+      z-index: 1;
+      /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%;
+      /* Full width */
+      height: 100%;
+      /* Full height */
+      overflow: auto;
+      /* Enable scroll if needed */
+      background-color: rgb(0, 0, 0);
+      /* Fallback color */
+      background-color: rgba(0, 0, 0, 0.4);
+      /* Black w/ opacity */
+}
+
+    /* Modal Content/Box */
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      /* 15% from the top and centered */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 50%;
+      /* Could be more or less, depending on screen size */
+    }
+
+    input {
+      font-size: 16px;
+    }
+
+    button {
+      font-size: 16px;
+</style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="col-xs-8">
+      <div id="googleMap" style="width:1200px;height:600px;" ondblclick="show_option()"></div>
+    </div>
+
+
+    <!-- Modal -->
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+
+      <!-- Modal content -->
+      <div class="modal-content">
+        <center>
+          <h3>Show History</h3>
+          <hr>
+
+          <div>
+            <input type="text" id="user" placeholder="user" style="width:98%;"></input>
+          </div>
+          <div>
+            <input type="text" id="date" placeholder="2016-11-16" style="width:98%;"></input>
+          </div>
+          <div>
+            <input type="text" id="time" placeholder="00:00:00" style="width:98%;"></input>
+          </div>
+          <hr>
+          <div>
+            <button type="button" style="width:49%;" onclick="get_history()">Submit</button>
+            <button type="button" style="width:49%;" onclick="hide_option()">Cancel</button>
+          </div>
+        </center>
+      </div>
+
+    </div>
+  </div>
+  <!-- <div class="col-xs-4">
+  <div class="col-xs-4"><input type="text" id="user" placeholder="user"></input></div>
+  <div class="col-xs-4"><input type="text" id="date" placeholder="2016-11-16"></input></div>
+  <div class="col-xs-4"><input type="text" id="time" placeholder="00:00:00"></input></div>
+  <button type="button" class="btn btn-default" onclick="get_history()">Default</button>
+</div>-->
+</body>
+
+</html>
+
+</html>
