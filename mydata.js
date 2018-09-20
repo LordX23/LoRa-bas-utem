@@ -1,15 +1,7 @@
 var mqtt = require('mqtt')
-//var client  = mqtt.connect('mqtt://loraroot:lorarootpassword@localhost')
 var client2  = mqtt.connect('mqtt://localhost')
-//var client = mqtt.connect('mqtt://35.186.148.157')
-
-//client.on('connect', function () {
-//  client.subscribe('gateway/b827ebfffe9ef316/rx')
-//  client.publish('presence', 'Hello mqtt')
-//})
 
 client2.on('connect', function () {
-  //client2.subscribe('gateway/+/rx')
   client2.subscribe('outTopic')
   //client2.subscribe('#')
   client2.publish('presence', 'Hello mqtt client2')
