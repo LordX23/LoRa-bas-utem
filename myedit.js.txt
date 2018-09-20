@@ -1,13 +1,6 @@
 var lora_packet = require('lora-packet');
 var mqtt = require('mqtt')
-//var client  = mqtt.connect('mqtt://loraroot:lorarootpassword@localhost')
 var client2  = mqtt.connect('mqtt://localhost')
-//var client = mqtt.connect('mqtt://35.186.148.157')
-
-//client.on('connect', function () {
-//  client.subscribe('gateway/b827ebfffe9ef316/rx')
-//  client.publish('presence', 'Hello mqtt')
-//})
 
 client2.on('connect', function () {
   client2.subscribe('gateway/+/rx')
@@ -19,9 +12,9 @@ client2.on('message', function (topic, message){
 
   console.log(topic)
   var message = message.toString();
-  //console.log(message)
+  console.log(message)
   var mess = message.split(',');
-  console.log(mess[0]+","+mess[7]+","+mess[8]+","+mess[15])
+  //console.log(mess[0]+","+mess[7]+","+mess[8]+","+mess[15])
   var rssi= mess[7].split(':');
   var rssiVal= rssi[1];
   console.log('Decoding the message')
