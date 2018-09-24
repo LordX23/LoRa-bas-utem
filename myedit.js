@@ -20,10 +20,10 @@ client2.on('message', function (topic, message){
   console.log('Decoding the message')
   mm = JSON.parse(message);
   if(mm.phyPayload){
-    var packet = lora_packet.fromWire(new Buffer(mm.phyPayload, 'base64'));
-    var NwkSKey = new Buffer('1ba5086ec4d7bb83924f1dc18ffae70a', 'hex');
+    var packet = lora_packet.fromWire(new Buffer(XXXXXXXX, 'base64'));
+    var NwkSKey = new Buffer('XXXXXXXX', 'hex');
     console.log("MIC check=" + (lora_packet.verifyMIC(packet, NwkSKey) ? "OK" : "fail"));
-    var AppSKey = new Buffer('d595ef0851bf4f37760e46c4fd7ea477', 'hex');
+    var AppSKey = new Buffer('XXXXXXXXXXXX', 'hex');
     latlong = lora_packet.decrypt(packet, AppSKey, NwkSKey).toString();
     console.log("Decrypted (ASCII)='" + latlong + "'"); 
     var partsOfStr = latlong.split(',');
@@ -49,9 +49,9 @@ client2.on('message', function (topic, message){
       "fPort": 11,                              // FPort to use (must be > 0)
       "data": Buffer.from(latlong).toString('base64'),                            // base64 encoded data (plaintex$
       });
-     //client2.publish("application/1/device/0004a30b001b5bd8/tx",pm);
-     client2.publish("application/1/device/0004a30b001b134e/tx",pm);
-     console.log("sending message to lora node by publish to application/1/device/0004a30b001b134e/tx" );
+
+     client2.publish("XXXXXXXXXXX",pm);
+     console.log("sending message to lora node by publish to XXXXXXXXXX" );
 
    }
   }
