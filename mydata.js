@@ -1,5 +1,5 @@
 var mqtt = require('mqtt')
-var client2  = mqtt.connect('mqtt://localhost')
+var client2  = mqtt.connect('mqtt://XXXXXX')
 
 client2.on('connect', function () {
   client2.subscribe('outTopic')
