@@ -9,16 +9,14 @@ const int buttonPin = 26;
 #define freqPlan TTN_FP_KR920_923
 
 // Update these with values suitable for your network.
-const char *devAddr = "079e1a6e";
-const char *nwkSKey = "1ba5086ec4d7bb83924f1dc18ffae70a";
-const char *appSKey = "d595ef0851bf4f37760e46c4fd7ea477";
-//const char *devAddr = "062f5e57";
-//const char *nwkSKey = "1ba5086ec4d7bb83924f1dc18ffae70a";
-//const char *appSKey = "d595ef0851bf4f37760e46c4fd7ea477";
+const char *devAddr = "XXXXXX";
+const char *nwkSKey = "XXXXXXXXXXXXXXXXXXX";
+const char *appSKey = "XXXXXXXXXXXXXXXXXXX";
 
-const char* ssid = "Sri";
-const char* password = "qwertyuiop";
-const char* mqtt_server = "35.240.203.234";
+
+const char* ssid = "XXXXXX";
+const char* password = "XXXXXX";
+const char* mqtt_server = "XXXXXXXX";
 int MQTTport=1883;
 WiFiClient espClient;
 PubSubClient client(espClient);
