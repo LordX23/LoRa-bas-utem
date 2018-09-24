@@ -4,9 +4,9 @@
 
 // Set your DevAddr, NwkSKey, AppSKey and the frequency plan
 
-const char *devAddr = "07ed57dd";
-const char *nwkSKey = "1ba5086ec4d7bb83924f1dc18ffae70a";
-const char *appSKey = "d595ef0851bf4f37760e46c4fd7ea477";
+const char *devAddr = "*******";
+const char *nwkSKey = "*****************";
+const char *appSKey = "*****************";
 
 #define debugSerial Serial
 const int buttonPin = 6;
