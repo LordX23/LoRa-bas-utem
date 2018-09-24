@@ -1,6 +1,6 @@
 var lora_packet = require('lora-packet');
 var mqtt = require('mqtt')
-var client2  = mqtt.connect('mqtt://localhost')
+var client2  = mqtt.connect('mqtt://XXXXXXX')
 
 client2.on('connect', function () {
   client2.subscribe('gateway/+/rx')
